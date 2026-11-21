@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yesda, 20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DotGothic16&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a manga volume read top to bottom. Hard-edged panels with offset shadows, VN-style text boxes, character sheets, one letter page. Her color is purple. */
+:root {
+  --paper: #f4f2f6;
+  --ink: #15111c;
+  --violet: #7b3ff2;
+  --sakura: #f2a1b8;
+  --mist: #e6e1ee;
+  --display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --body: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Segoe UI", sans-serif;
+  --pixel: "DotGothic16", "MS Gothic", monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img { max-width: 100%; height: auto; display: block; }
+h1, h2, h3 { text-wrap: balance; font-weight: 400; margin: 0; }
+p { margin: 0; }
+.wrap { width: min(960px, 100% - 32px); margin-inline: auto; }
+#petals { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+
+/* ---------- Cover ---------- */
+.cover {
+  position: relative;
+  border-bottom: 4px solid var(--ink);
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, rgba(21,17,28,.16) 1.2px, transparent 1.6px);
+  background-size: 9px 9px;
+  overflow: hidden;
+}
+.cover::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-conic-gradient(from 0deg at 72% 46%, transparent 0 7deg, rgba(123,63,242,.09) 7deg 8deg);
+  pointer-events: none;
+}
+.cover-grid {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1.1fr 1fr;
+  gap: 28px;
+  align-items: center;
+  padding-block: 44px 28px;
+}
+.vert {
+  writing-mode: vertical-rl;
+  font-family: var(--display);
+  font-size: clamp(34px, 6vw, 64px);
+  letter-spacing: .12em;
+  color: var(--violet);
+  line-height: 1;
+  border-left: 3px solid var(--ink);
+  padding-left: 14px;
+}
+.tag {
+  font-family: var(--pixel);
+  font-size: 15px;
+  letter-spacing: .08em;
+  display: inline-block;
+  background: var(--ink); color: var(--paper);
+  padding: 3px 10px;
+}
+.cover h1 {
+  font-family: var(--display);
+  font-size: clamp(52px, 10vw, 112px);
+  line-height: .92;
+  margin-top: 16px;
+  letter-spacing: -.01em;
+}
+.cover h1 .twenty {
+  display: inline-block;
+  color: var(--paper);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 6px 6px 0 var(--violet);
+  font-size: 1.5em;
+  line-height: .9;
+}
+.cover .sub { margin-top: 20px; max-width: 34ch; font-weight: 500; }
+.cover .date { margin-top: 14px; font-family: var(--pixel); font-size: 16px; color: var(--violet); letter-spacing: .06em; }
+.cover-art {
+  border: 4px solid var(--ink);
+  background: #fff;
+  box-shadow: 10px 10px 0 var(--violet);
+  transform: rotate(2deg);
+}
+.cover-art img { width: 100%; }
+.music-row { position: relative; z-index: 1; text-align: center; padding-bottom: 14px; }
+.music {
+  display: inline-block;
+  font-family: var(--display); font-size: 17px; line-height: 1.3;
+  color: #fff; background: var(--violet);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 12px 22px;
+  text-decoration: none;
+  transition: transform .12s, box-shadow .12s;
+}
+.music:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+.music-note { margin-top: 12px; font-family: var(--pixel); font-size: 15px; letter-spacing: .04em; }
+.scroll-hint {
+  position: relative; z-index: 1;
+  text-align: center;
+  font-family: var(--pixel);
+  padding-block: 8px 18px;
+  letter-spacing: .1em;
+}
+
+/* ---------- Text box (visual-novel style) ---------- */
+.vn {
+  position: relative;
+  background: var(--ink);
+  color: #fff;
+  border: 3px solid var(--ink);
+  outline: 3px solid var(--paper);
+  outline-offset: -9px;
+  padding: 30px 28px 26px;
+  margin-top: 44px;
+}
+.vn .name {
+  position: absolute; top: -18px; left: 22px;
+  background: var(--violet); color: #fff;
+  font-family: var(--pixel); font-size: 17px; letter-spacing: .06em;
+  padding: 2px 14px;
+  border: 3px solid var(--ink);
+}
+.vn p + p { margin-top: 12px; }
+.vn .next {
+  position: absolute; right: 18px; bottom: 10px;
+  color: var(--sakura); font-size: 14px;
+  animation: blink 1.2s steps(2) infinite;
+}
+@keyframes blink { 50% { opacity: .2; } }
+
+/* ---------- Cast ---------- */
+.cast { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 44px; }
+.card {
+  border: 4px solid var(--ink);
+  background: #fff;
+  box-shadow: 7px 7px 0 var(--violet);
+  padding: 18px 20px 20px;
+}
+.card.me { box-shadow: 7px 7px 0 var(--ink); }
+.card .role {
+  display: inline-block;
+  font-family: var(--pixel); font-size: 15px; letter-spacing: .08em;
+  background: var(--violet); color: #fff; padding: 2px 10px;
+}
+.card.me .role { background: var(--ink); }
+.card h3 { font-family: var(--display); font-size: 30px; margin: 10px 0 8px; line-height: 1.1; }
+.card dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; font-size: 16px; }
+.card dt { font-family: var(--pixel); color: var(--violet); }
+.card dd { margin: 0; }
+
+/* ---------- Chapters ---------- */
+.chapter { padding-block: 72px 8px; }
+.ch-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.ch-num {
+  font-family: var(--pixel);
+  background: var(--violet); color: #fff;
+  padding: 2px 12px; letter-spacing: .08em; font-size: 16px;
+  border: 3px solid var(--ink);
+}
+.ch-head h2 { font-family: var(--display); font-size: clamp(26px, 4.6vw, 44px); line-height: 1.1; }
+.panel {
+  border: 4px solid var(--ink);
+  background: #fff;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.panel.accent { box-shadow: 8px 8px 0 var(--violet); }
+.lead { margin-top: 28px; max-width: 58ch; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.pair .panel:nth-child(1) { transform: rotate(-1.2deg); }
+.pair .panel:nth-child(2) { transform: rotate(1deg); margin-top: 22px; }
+.cap {
+  font-family: var(--pixel); font-size: 15px; letter-spacing: .04em;
+  padding: 8px 12px; border-top: 3px solid var(--ink); background: var(--mist);
+}
+.ai-note {
+  margin-top: 28px; max-width: 58ch;
+  font-family: var(--pixel); font-size: 16px; letter-spacing: .03em;
+  border-left: 5px solid var(--violet); padding: 4px 0 4px 14px;
+}
+.split { display: grid; grid-template-columns: minmax(0, 360px) 1fr; gap: 36px; align-items: center; margin-top: 40px; }
+.split .panel { transform: rotate(-1deg); }
+.sfx {
+  font-family: var(--display);
+  font-size: clamp(34px, 6vw, 56px);
+  color: var(--violet);
+  line-height: 1;
+}
+
+/* ---------- Inventory ---------- */
+.items { list-style: none; margin: 30px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.item { border: 4px solid var(--ink); background: #fff; box-shadow: 6px 6px 0 var(--violet); padding: 18px 18px 20px; }
+.item .k { font-family: var(--pixel); color: var(--violet); font-size: 15px; letter-spacing: .08em; }
+.item h3 { font-family: var(--display); font-size: 22px; line-height: 1.15; margin: 6px 0 10px; }
+.item p { font-size: 16px; line-height: 1.6; }
+
+/* ---------- Letter ---------- */
+.letter-sec { padding-block: 80px 24px; }
+.letter {
+  position: relative;
+  background: #fffefd;
+  border: 4px solid var(--ink);
+  box-shadow: 10px 10px 0 var(--sakura);
+  padding: clamp(28px, 6vw, 64px);
+  background-image: repeating-linear-gradient(to bottom, transparent 0 33px, rgba(123,63,242,.15) 33px 34px);
+  background-size: 100% 34px;
+}
+.letter .kanji {
+  position: absolute; top: 18px; right: 22px;
+  writing-mode: vertical-rl;
+  font-family: var(--display);
+  font-size: clamp(30px, 5vw, 54px);
+  color: var(--violet);
+  letter-spacing: .1em;
+  line-height: 1;
+}
+.letter h2 { font-family: var(--display); font-size: clamp(30px, 5vw, 48px); line-height: 1.1; max-width: 14ch; margin-bottom: 26px; background: #fffefd; display: inline-block; padding-right: 10px; }
+.letter p { max-width: 54ch; margin-bottom: 34px; background: #fffefd; }
+.letter .sign { font-family: var(--display); font-size: 26px; margin: 8px 0 0; background: #fffefd; display: inline-block; padding-right: 10px; }
+
+/* ---------- Quests ---------- */
+.quests { margin-top: 72px; }
+.quests h2 { font-family: var(--display); font-size: clamp(26px, 4.4vw, 40px); margin-bottom: 20px; }
+.quest-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.quest {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
+  border: 3px solid var(--ink); background: #fff; padding: 12px 16px;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.quest .n { font-family: var(--pixel); color: var(--violet); font-size: 20px; }
+.quest .st { font-family: var(--pixel); font-size: 14px; padding: 2px 10px; border: 2px solid var(--ink); background: var(--mist); white-space: nowrap; }
+.quest.main { background: var(--violet); color: #fff; }
+.quest.main .n { color: var(--sakura); }
+.quest.main .st { background: var(--sakura); color: var(--ink); }
+
+/* ---------- Finale ---------- */
+.finale { text-align: center; padding-block: 96px 60px; }
+.badge { font-family: var(--pixel); letter-spacing: .12em; color: var(--violet); }
+.big20 {
+  font-family: var(--display);
+  font-size: clamp(120px, 28vw, 260px);
+  line-height: 1;
+  color: var(--paper);
+  -webkit-text-stroke: 4px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 10px 10px 0 var(--violet);
+  margin: 10px 0;
+}
+.finale h2 { font-family: var(--display); font-size: clamp(26px, 5vw, 44px); }
+.btn {
+  margin-top: 32px;
+  font-family: var(--display); font-size: 20px;
+  background: var(--sakura); color: var(--ink);
+  border: 4px solid var(--ink);
+  padding: 14px 28px;
+  box-shadow: 6px 6px 0 var(--ink);
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+.btn:active { transform: translate(5px, 5px); box-shadow: 1px 1px 0 var(--ink); }
+.btn:focus-visible, a:focus-visible { outline: 4px solid var(--violet); outline-offset: 4px; }
+.tsudzuku { margin-top: 64px; font-family: var(--display); font-size: 28px; letter-spacing: .1em; }
+.tsudzuku small { display: block; font-family: var(--pixel); font-size: 15px; letter-spacing: .08em; margin-top: 6px; color: var(--violet); }
+
+@media (max-width: 760px) {
+  body { font-size: 17px; }
+  .cover-grid { grid-template-columns: auto 1fr; padding-block: 28px 20px; }
+  .cover-art { grid-column: 1 / -1; max-width: 420px; justify-self: center; }
+  .cast { grid-template-columns: 1fr; }
+  .pair { grid-template-columns: 1fr; gap: 28px; }
+  .pair .panel:nth-child(2) { margin-top: 0; }
+  .split { grid-template-columns: 1fr; }
+  .split .panel { max-width: 340px; }
+  .items { grid-template-columns: 1fr; }
+  .quest { grid-template-columns: auto 1fr; }
+  .quest .st { grid-column: 2; justify-self: start; }
+  .letter .kanji { top: 12px; right: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vn .next { animation: none; }
+  .btn, .music { transition: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="petals" aria-hidden="true"></canvas>
+
+<header class="cover">
+  <div class="wrap cover-grid">
+    <div class="vert" aria-hidden="true">二十歳</div>
+    <div>
+      <span class="tag">TOMO Nº 20 · EDICIÓN ESPECIAL</span>
+      <h1>Yesda,<br><span class="twenty">20</span></h1>
+      <p class="sub">Un capítulo nuevo empieza hoy, y la protagonista eres tú.</p>
+      <p class="date">22 · 11 · 2026 &nbsp;/&nbsp; Islas Canarias</p>
+    </div>
+    <div class="cover-art">
+      <img src="img/cover-chibi.jpg" alt="Ilustración chibi de Osito y Yesda abrazados, ella con un guiño y él con gafas de sol">
+    </div>
+  </div>
+  <div class="wrap music-row">
+    <a class="music" href="https://youtu.be/jFu4iOw4pQU" target="_blank" rel="noopener">♪ Ponle play a la canción de Your Name</a>
+    <p class="music-note">Se abre en YouTube. Déjala sonando y vuelve aquí para leer.</p>
+  </div>
+  <div class="scroll-hint">DESLIZA PARA LEER ▼</div>
+</header>
+
+<main class="wrap">
+
+  <div class="vn" role="note">
+    <span class="name">Osito</span>
+    <p>Feliz cumpleaños, osita.</p>
+    <p>Esta vez no quise mandarte solo un mensaje. Te armé un manga, porque la protagonista de esta historia eres tú y merece su tomo especial. Yo me quedo con el papel de consejero, que ya sabes que lo hago con todo el cariño.</p>
+    <span class="next" aria-hidden="true">▼</span>
+  </div>
+
+  <div class="cast" aria-label="Personajes">
+    <article class="card">
+      <span class="role">PROTAGONISTA</span>
+      <h3>Yesda</h3>
+      <dl>
+        <dt>NIVEL</dt><dd>20</dd>
+        <dt>APODO</dt><dd>Osita</dd>
+        <dt>COLOR</dt><dd>Morado</dd>
+        <dt>UBICACIÓN</dt><dd>Islas Canarias</dd>
+      </dl>
+    </article>
+    <article class="card me">
+      <span class="role">CONSEJERO</span>
+      <h3>Osito</h3>
+      <dl>
+        <dt>NIVEL</dt><dd>más años, las mismas ganas</dd>
+        <dt>APODO</dt><dd>Osito</dd>
+        <dt>MISIÓN</dt><dd>Apoyar a la protagonista en cada capítulo</dd>
+        <dt>UBICACIÓN</dt><dd>Bogotá</dd>
+      </dl>
+    </article>
+  </div>
+
+  <!-- Capítulo 1 -->
+  <section class="chapter" aria-labelledby="c1">
+    <div class="ch-head"><span class="ch-num">CAP. 01</span><h2 id="c1">Dos personas, un sueño</h2></div>
+    <div class="panel accent">
+      <img src="img/cafe-manga.jpg" alt="Manga de tres viñetas: dos personas se encuentran, dicen que da miedo empezar de cero pero que no tienen que hacerlo solos, y descubren su sueño: abrir un café">
+    </div>
+    <p class="lead">Todo capítulo grande empieza con alguien que dice hola. A veces da miedo empezar de cero, pero contigo aprendí que no hay que hacerlo solo. Y que un sueño puede caber en una taza de café.</p>
+  </section>
+
+  <!-- Capítulo 2 -->
+  <section class="chapter" aria-labelledby="c2">
+    <div class="ch-head"><span class="ch-num">CAP. 02</span><h2 id="c2">Un abrazo que aún es de pantalla</h2></div>
+    <div class="pair">
+      <figure class="panel" style="margin:0">
+        <img src="img/fotobooth.jpg" alt="Tira de fotomatón de Yesda y Osito: ella riendo a carcajadas, ella señalándolo, y un beso en la mejilla">
+        <figcaption class="cap">Nuestro fotomatón, cuadro 1 de 3</figcaption>
+      </figure>
+      <figure class="panel" style="margin:0">
+        <img src="img/polaroid.jpg" alt="Polaroid de Osito abrazando a Yesda por detrás, los dos sonriendo">
+        <figcaption class="cap">Este abrazo todavía no existe. Algún día sí.</figcaption>
+      </figure>
+    </div>
+    <p class="ai-note">Estas imágenes las hizo la inteligencia artificial, con mucho cariño, mientras llega el día en que nos tomemos una de verdad.</p>
+    <p class="lead" style="margin-top:20px">Todavía no nos hemos visto en persona, y aun así llevamos más de un año construyendo algo real. Me enseñaste que el amor no necesita el mismo código postal. Necesita ganas, y de esas nos sobran.</p>
+  </section>
+
+  <!-- Capítulo 3 -->
+  <section class="chapter" aria-labelledby="c3">
+    <div class="ch-head"><span class="ch-num">CAP. 03</span><h2 id="c3">Y entonces todo cambió</h2></div>
+    <div class="panel accent">
+      <img src="img/kiss-manga.png" alt="Manga en blanco y negro: él dice que no sabe desde cuándo pero que en algún momento todo cambió, se besan, y ella responde que también lo ama">
+    </div>
+    <div class="split">
+      <figure class="panel" style="margin:0">
+        <img src="img/gala.jpg" alt="Imagen nocturna de Yesda con vestido azul y uñas azules besando a Osito bajo luces de palmera">
+      </figure>
+      <div>
+        <p class="sfx" aria-hidden="true">ちゅ…</p>
+        <p style="margin-top:14px;max-width:44ch">No sé en qué momento exacto fue. Solo sé que un día miré hacia atrás y ya eras mi lugar favorito. Por eso este manga lleva tu color, el morado.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capítulo 4 -->
+  <section class="chapter" aria-labelledby="c4m">
+    <div class="ch-head"><span class="ch-num">CAP. 04</span><h2 id="c4m">Los mundos que construimos</h2></div>
+    <p class="lead" style="margin-top:0">Nuestra historia no cabe en una sola foto. Está repartida en todo lo que hemos hecho juntos, y esto es lo que llevamos en el inventario.</p>
+    <ul class="items">
+      <li class="item">
+        <span class="k">ITEM 01</span>
+        <h3>Mundos de Minecraft</h3>
+        <p>Construimos mundos enteros a punta de bloques y paciencia. Cada casa y cada rincón que levantamos juntos es un pedacito de nosotros.</p>
+      </li>
+      <li class="item">
+        <span class="k">ITEM 02</span>
+        <h3>Juegos que aprendimos juntos</h3>
+        <p>Aprendimos juegos desde cero, perdiendo mil veces y riéndonos otras tantas. Contigo hasta perder se siente como ganar.</p>
+      </li>
+      <li class="item">
+        <span class="k">ITEM 03</span>
+        <h3>Cada película</h3>
+        <p>Ninguna película que hemos visto pasó de largo. Cada una fue una noche compartida, aunque el mapa nos separara.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Carta -->
+  <section class="letter-sec" aria-labelledby="c20">
+    <div class="ch-head"><span class="ch-num">CAP. 20</span></div>
+    <article class="letter">
+      <div class="kanji" aria-hidden="true">二十歳</div>
+      <h2 id="c20">Veinte</h2>
+
+      <p>Osita, hoy cierras los diecinueve y abres una puerta que solo se cruza una vez. Los veinte son una edad rara y hermosa: ya no te toca ser adolescente, pero nadie te exige tener la vida resuelta. Es cuando empiezas a decidir quién quieres ser, qué quieres construir y con quién quieres caminar.</p>
+
+      <p>En Japón, los veinte son la edad en que uno pasa a ser adulto, y hasta tienen una ceremonia solo para eso, el <i>Seijin no Hi</i>. Me gustó imaginar que hoy tienes la tuya, aunque sea al otro lado del mar y con un manga como único invitado.</p>
+
+      <p>Y como tu consejero oficial, te dejo mi consejo para esta década: equivócate sin miedo, cambia de idea las veces que haga falta, ríete hasta que te duela la cara, cuídate primero y créete tan capaz como realmente eres. Tú eres la protagonista de esta historia. Yo me conformo con el mejor asiento.</p>
+
+      <p>Te prometo cosas pequeñas, que son las que valen: estar, escucharte, celebrar cada logro tuyo como si fuera mío y seguir caminando hacia el día en que este abrazo deje de ser de pantalla. Y hacia nuestro sueño de casarnos.</p>
+
+      <p>Feliz cumpleaños número 20, mi osita. Que esta etapa te encuentre valiente, querida y muy feliz. Desde aquí te aplaudo en primera fila.</p>
+
+      <p class="sign" style="margin-bottom:0">Te amo, Yesda.<br>— Tu osito</p>
+    </article>
+  </section>
+
+  <!-- Misiones -->
+  <section class="quests" aria-labelledby="q">
+    <h2 id="q">Misiones del nivel 20</h2>
+    <ul class="quest-list">
+      <li class="quest"><span class="n">01</span><span>Reírte a carcajadas, todos los días que se pueda</span><span class="st">EN CURSO</span></li>
+      <li class="quest"><span class="n">02</span><span>Equivocarte sin miedo y volver a intentarlo</span><span class="st">EN CURSO</span></li>
+      <li class="quest"><span class="n">03</span><span>Perseguir lo que te emociona, aunque asuste un poco</span><span class="st">EN CURSO</span></li>
+      <li class="quest"><span class="n">04</span><span>Seguir construyendo mundos, juegos y películas juntos</span><span class="st">EN CURSO</span></li>
+      <li class="quest main"><span class="n">★</span><span><strong>Misión principal:</strong> abrazarnos de verdad, abrir nuestro café y casarnos</span><span class="st">NUESTRO SUEÑO</span></li>
+    </ul>
+  </section>
+
+  <!-- Final -->
+  <section class="finale" aria-labelledby="fin">
+    <p class="badge">NIVEL DESBLOQUEADO</p>
+    <div class="big20" aria-hidden="true">20</div>
+    <h2 id="fin">Feliz cumpleaños, Yesda</h2>
+    <button class="btn" id="celebrate" type="button">Soplar la vela 🕯️</button>
+    <p class="tsudzuku">つづく<small>CONTINUARÁ…</small></p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var canvas = document.getElementById('petals');
+  var ctx = canvas.getContext('2d');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var petals = [];
+
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function petal(x, y, burst) {
+    var a = burst ? (-Math.PI / 2 + (Math.random() - .5) * 2.4) : 0;
+    var s = burst ? 4 + Math.random() * 9 : 0;
+    return {
+      x: x, y: y,
+      r: 5 + Math.random() * 6,
+      vx: burst ? Math.cos(a) * s : (Math.random() - .3) * .8,
+      vy: burst ? Math.sin(a) * s : .5 + Math.random() * .9,
+      rot: Math.random() * 6.28,
+      vr: (Math.random() - .5) * .08,
+      sway: Math.random() * 6.28,
+      life: burst ? 1 : 99,
+      burst: !!burst,
+      hue: Math.random() < .5 ? 0 : 1
+    };
+  }
+
+  if (!reduce) {
+    for (var i = 0; i < 22; i++) petals.push(petal(Math.random() * W, Math.random() * H, false));
+  }
+
+  function draw(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = p.burst ? Math.min(1, p.life) : .75;
+    ctx.fillStyle = p.hue ? '#b793f7' : '#f2a1b8';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, p.r, p.r * .55, 0, 0, 6.283);
+    ctx.fill();
+    ctx.fillStyle = p.hue ? '#dccbfb' : '#fbd3df';
+    ctx.beginPath();
+    ctx.ellipse(-p.r * .2, 0, p.r * .45, p.r * .22, 0, 0, 6.283);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    for (var i = petals.length - 1; i >= 0; i--) {
+      var p = petals[i];
+      p.sway += .03;
+      p.x += p.vx + Math.sin(p.sway) * .5;
+      p.y += p.vy;
+      p.rot += p.vr;
+      if (p.burst) {
+        p.vy += .18; p.vx *= .985; p.life -= .006;
+        if (p.life <= 0 || p.y > H + 20) { petals.splice(i, 1); continue; }
+      } else if (p.y > H + 20) {
+        p.y = -20; p.x = Math.random() * W;
+      }
+      draw(p);
+    }
+    if (petals.length) requestAnimationFrame(tick); else ctx.clearRect(0, 0, W, H);
+  }
+  if (petals.length) requestAnimationFrame(tick);
+
+  var btn = document.getElementById('celebrate');
+  btn.addEventListener('click', function () {
+    var rect = btn.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    var wasEmpty = petals.length === 0;
+    var n = reduce ? 18 : 90;
+    for (var i = 0; i < n; i++) petals.push(petal(cx, cy, true));
+    if (wasEmpty) requestAnimationFrame(tick);
+    btn.textContent = '¡Pide un deseo! ✨';
+  });
+})();
+</script>
+</body>
+</html>
